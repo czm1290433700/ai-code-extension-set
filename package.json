@@ -4,7 +4,7 @@
   "description": "Code-assisted extension plugin set based on OpenAI",
   "version": "0.0.1",
   "engines": {
-    "vscode": "^1.89.0"
+    "vscode": "^1.88.0"
   },
   "categories": [
     "Other"
@@ -12,12 +12,38 @@
   "activationEvents": [],
   "main": "./dist/extension.js",
   "contributes": {
-    "commands": [
-      {
-        "command": "ai-code-extension-set.helloWorld",
-        "title": "Hello World"
+    "views": {
+      "chatgpt-for-vscode": [{
+        "type": "webview",
+        "id": "chatgpt-for-vscode",
+        "name": ""
+      }]
+    },
+    "viewsContainers": {
+      "activitybar": [{
+        "id": "chatgpt-for-vscode",
+        "title": "chatgpt for vscode",
+        "icon": "images/icon.svg"
+      }]
+    },
+    "configuration": {
+      "title": "AI Code Extension Set",
+      "properties": {
+        "aiCodeExtensionSet.apiKey": {
+          "type": "string",
+          "default": "",
+          "description": "使用的模型API_KEY"
+        },
+        "aiCodeExtensionSet.model": {
+          "type": "string",
+          "default": "gpt-3.5-turbo",
+          "enum": [
+            "gpt-3.5-turbo"
+          ],
+          "description": "使用的模型"
+        }
       }
-    ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run package",
@@ -31,17 +57,29 @@
     "test": "vscode-test"
   },
   "devDependencies": {
-    "@types/vscode": "^1.89.0",
+    "@babel/preset-env": "^7.24.5",
+    "@babel/preset-react": "^7.24.1",
+    "@babel/preset-typescript": "^7.24.1",
     "@types/mocha": "^10.0.6",
     "@types/node": "18.x",
+    "@types/react": "^16.14.60",
+    "@types/react-dom": "^16.9.24",
+    "@types/vscode": "^1.88.0",
     "@typescript-eslint/eslint-plugin": "^7.4.0",
     "@typescript-eslint/parser": "^7.4.0",
-    "eslint": "^8.57.0",
-    "typescript": "^5.3.3",
-    "ts-loader": "^9.5.1",
-    "webpack": "^5.91.0",
-    "webpack-cli": "^5.1.4",
     "@vscode/test-cli": "^0.0.8",
-    "@vscode/test-electron": "^2.3.9"
+    "@vscode/test-electron": "^2.3.9",
+    "babel-loader": "^9.1.3",
+    "css-loader": "^7.1.1",
+    "eslint": "^8.57.0",
+    "style-loader": "^3.3.4",
+    "ts-loader": "^9.5.1",
+    "typescript": "^5.3.3",
+    "webpack": "^5.91.0",
+    "webpack-cli": "^5.1.4"
+  },
+  "dependencies": {
+    "react": "^16.14.0",
+    "react-dom": "^16.14.0"
   }
 }
