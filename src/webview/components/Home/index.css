@@ -1,0 +1,44 @@
+.home_chatItem {
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid var(--vscode-foreground);
+  border-radius: 10px;
+  background: var(--vscode-textPreformat-background);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.home_chatItem:first-of-type {
+  margin-top: 20px;
+}
+
+.home_chatItem:hover {
+  border-color: var(--vscode-focusBorder);
+}
+
+.home_titleArea {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.home_infoArea {
+  display: flex;
+  align-items: center;
+}
+
+.home_timestamp {
+  text-wrap: nowrap;
+}
+
+.home_deleteBtn {
+  font-weight: 600;
+  cursor: pointer;
+  margin-left: 8px;
+}
+
+.home_deleteBtn:hover {
+  color: var(--vscode-focusBorder);
+}

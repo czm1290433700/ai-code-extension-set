@@ -4,7 +4,6 @@ const path = require('path');
 
 const webviewConfig = {
   devtool: 'source-map',
-  target: 'node',
   mode: 'development',
   entry: './src/webview/App.tsx',
   output: {
@@ -27,7 +26,7 @@ const webviewConfig = {
         use: ['style-loader', 'css-loader']
       },
       {
-        test: /\.tsx?$/,
+        test: /\.tsx?$|\.jsx?$/,
         exclude: /node_modules/,
         use: {
           loader: 'babel-loader',
