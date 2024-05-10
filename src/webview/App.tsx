@@ -26,7 +26,7 @@ const App = () => {
     vscode.postMessage({
       method: 'initParams'
     });
-  }, []);
+  }, [currentMode]);
 
   return (
     <>

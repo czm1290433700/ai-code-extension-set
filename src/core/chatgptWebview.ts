@@ -42,10 +42,7 @@ class ChatgptWebviewProvider implements vscode.WebviewViewProvider {
           if (cacheIndex !== -1) {
             cache[cacheIndex].chatList = chat;
           }
-          this.extensonContext.workspaceState.update('chatCache', chatCache);
-          webviewView.webview.postMessage({
-            chatCache: this.extensonContext.workspaceState.get('chatCache', []),
-          });
+          this.extensonContext.workspaceState.update('chatCache', cache);
           break;
         default:
           break;

@@ -30,9 +30,15 @@ export const Chat: FC<IProps> = ({ vscode, params, chat, onBack }) => {
    * 提问function
    */
   const submit = async () => {
-    debugger;
     const LLMRequestEntity = new LLMRequest(apiKey);
     let result = '';
+    setCurrentChatList([
+      ...currentChatList,
+      {
+        role: 'user',
+        content: question
+      }
+    ]);
     await LLMRequestEntity.openAIStreamChatCallback(
       {
         model,
@@ -57,30 +63,28 @@ export const Chat: FC<IProps> = ({ vscode, params, chat, onBack }) => {
         }
       }
     );
-    const chatList: AIQuestionItem[] = [{
-      role: 'user',
-      content: question
-    }, {
-      role: 'assistant',
-      content: answer
-    }];
+    const newChat: AIQuestionItem[] = [
+      ...currentChatList,
+      {
+        role: 'user',
+        content: question
+      },
+      {
+        role: 'assistant',
+        content: result
+      }
+    ];
     // 如果是首次需要更新缓存
     if (currentChatList.length === 0) {
       vscode.postMessage({
         method: 'updateChatCacheByTimestamp',
         params: {
-          chat: [
-            ...currentChatList,
-            ...chatList
-          ],
+          chat: newChat,
           timestamp
         }
       });
     }
-    setCurrentChatList([
-      ...currentChatList,
-      ...chatList
-    ]);
+    setCurrentChatList(newChat);
     setAnswer('');
   };
 
@@ -92,32 +96,32 @@ export const Chat: FC<IProps> = ({ vscode, params, chat, onBack }) => {
     <div>
       <button onClick={onBack}>回到首页</button>
       {!(apiKey && model) && <div>未填写apiKey或model配置，请完成必要配置后使用</div>}
-      <div ref={contentRef}>
+      <div className="chat_chatArea" ref={contentRef}>
         {currentChatList.map((item) => {
           return item.role === 'assistant' ? (
-            <div>
-              <div>ChatGPT</div>
-              <div>{item.content}</div>
+            <div className="chat_chatItem">
+              <div className="chat_chatRole">ChatGPT</div>
+              <div className="chat_chatContent">{item.content}</div>
             </div>
           ) : (
-            <div>
-              <div>You</div>
-              <div>{item.content}</div>
+            <div className="chat_chatItem" style={{ alignItems: 'flex-end' }}>
+              <div className="chat_chatRole">You</div>
+              <div className="chat_chatContent">{item.content}</div>
             </div>
           );
         })}
         {answer &&
-          <div>
-            <div>ChatGPT</div>
-            <div>{answer}</div>
+          <div className="chat_chatItem" >
+            <div className="chat_chatRole">ChatGPT</div>
+            <div className="chat_chatContent">{answer}</div>
           </div>}
       </div>
       <div>
         <div>
-          <div>
+          <div className="chat_bottomArea">
             <textarea
               className="chat_textarea"
-              placeholder="输入询问的问题，按发送按钮或Enter回车结束"
+              placeholder="点击发送按钮或Enter回车询问"
               value={question}
               onChange={(event) => {
                 setQuestion(event.target.value);
@@ -129,9 +133,8 @@ export const Chat: FC<IProps> = ({ vscode, params, chat, onBack }) => {
                 }
               }}
             ></textarea>
-            <div
-              className={`chat_submitBtn ${!enableSubmit ? "chat_disabled" : ""
-                }`}
+            <button
+              className={`chat_submitBtn ${enableSubmit ? "" : "chat_disabled"}`}
               onClick={() => {
                 if (enableSubmit) {
                   submit();
@@ -139,7 +142,7 @@ export const Chat: FC<IProps> = ({ vscode, params, chat, onBack }) => {
               }}
             >
               发送
-            </div>
+            </button>
           </div>
         </div>
       </div>

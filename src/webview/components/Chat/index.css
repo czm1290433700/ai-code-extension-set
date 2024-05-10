@@ -1,0 +1,56 @@
+.chat_bottomArea {
+  position: relative;
+  width: 100%;
+}
+
+.chat_textarea {
+  border: 1px solid var(--vscode-foreground);
+  width: 100%;
+  padding: 10px 5px 0px;
+  border-radius: 6px;
+  resize: none;
+  box-sizing: border-box;
+  background-color: var(--vscode-textPreformat-background);
+  color: var(--vscode-foreground);
+}
+
+.chat_chatArea {
+  height: calc(100vh - 185px);
+  overflow: auto;
+  margin: 15px 0;
+}
+
+.chat_chatItem {
+  display: flex;
+  flex-direction: column;
+}
+
+.chat_chatRole {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.chat_chatContent {
+  border: 1px solid var(--vscode-foreground);
+  border-radius: 8px;
+  padding: 10px;
+  background: var(--vscode-textCodeBlock-background);
+  margin: 10px 0;
+  width: fit-content;
+}
+
+.chat_submitBtn {
+  position: absolute;
+  right: 10px;
+  bottom: 8px;
+}
+
+.chat_disabled {
+  background-color: var(--vscode-disabledForeground);
+  cursor: not-allowed;
+}
+
+.chat_disabled:hover {
+  background-color: var(--vscode-disabledForeground);
+  cursor: not-allowed;
+}
