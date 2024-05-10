@@ -2,6 +2,9 @@ import { default as LLMRequest } from "llm-request";
 import React, { FC, useEffect, useMemo, useRef, useState } from 'react';
 import { AIQuestionItem } from '../../App';
 import { IChatItem } from "../Home";
+import { MarkdownParser } from "../MarkdownParser";
+import hljs from "highlight.js";
+import "highlight.js/styles/default.css";
 import './index.css';
 
 interface IProps {
@@ -25,6 +28,10 @@ export const Chat: FC<IProps> = ({ vscode, params, chat, onBack }) => {
     setCurrentChatList(chat.chatList);
     setTimestamp(chat.timestamp);
   }, [chat]);
+
+  useEffect(() => {
+    hljs.highlightAll();
+  }, [currentChatList]);
 
   /**
    * 提问function
@@ -101,7 +108,9 @@ export const Chat: FC<IProps> = ({ vscode, params, chat, onBack }) => {
           return item.role === 'assistant' ? (
             <div className="chat_chatItem">
               <div className="chat_chatRole">ChatGPT</div>
-              <div className="chat_chatContent">{item.content}</div>
+              <div className="chat_chatContent">
+                <MarkdownParser answer={item.content} />
+              </div>
             </div>
           ) : (
             <div className="chat_chatItem" style={{ alignItems: 'flex-end' }}>
@@ -113,7 +122,9 @@ export const Chat: FC<IProps> = ({ vscode, params, chat, onBack }) => {
         {answer &&
           <div className="chat_chatItem" >
             <div className="chat_chatRole">ChatGPT</div>
-            <div className="chat_chatContent">{answer}</div>
+            <div className="chat_chatContent">
+              <MarkdownParser answer={answer} />
+            </div>
           </div>}
       </div>
       <div>
