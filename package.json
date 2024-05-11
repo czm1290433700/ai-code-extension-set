@@ -45,6 +45,11 @@
             "gpt-3.5-turbo"
           ],
           "description": "使用的模型"
+        },
+        "aiCodeExtensionSet.targetLanguage": {
+          "type": "string",
+          "default": "",
+          "description": "语言转换的目标语言"
         }
       }
     }
