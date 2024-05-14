@@ -2,15 +2,15 @@ import { IChatItem } from '../webview/components/Home';
 import * as vscode from 'vscode';
 
 class ChatgptWebviewProvider implements vscode.WebviewViewProvider {
-  private extensonContext: vscode.ExtensionContext;
+  private extensionContext: vscode.ExtensionContext;
   constructor(context: vscode.ExtensionContext) {
-    this.extensonContext = context;
+    this.extensionContext = context;
   }
 
   public resolveWebviewView(webviewView: vscode.WebviewView) {
     webviewView.webview.options = {
       enableScripts: true,
-      localResourceRoots: [vscode.Uri.joinPath(this.extensonContext.extensionUri, 'dist')]
+      localResourceRoots: [vscode.Uri.joinPath(this.extensionContext.extensionUri, 'dist')]
     };
     webviewView.webview.html = this.getWebviewContent(webviewView.webview);
 
@@ -21,7 +21,7 @@ class ChatgptWebviewProvider implements vscode.WebviewViewProvider {
         case 'initParams':
           const configuration = vscode.workspace.getConfiguration();
           webviewView.webview.postMessage({
-            chatCache: this.extensonContext.workspaceState.get('chatCache', []),
+            chatCache: this.extensionContext.workspaceState.get('chatCache', []),
             apiKey: configuration.get('aiCodeExtensionSet.apiKey'),
             model: configuration.get('aiCodeExtensionSet.model')
           });
@@ -29,20 +29,20 @@ class ChatgptWebviewProvider implements vscode.WebviewViewProvider {
         // 落新的缓存
         case 'updateChatCache':
           const { chatCache } = params;
-          this.extensonContext.workspaceState.update('chatCache', chatCache);
+          this.extensionContext.workspaceState.update('chatCache', chatCache);
           webviewView.webview.postMessage({
-            chatCache: this.extensonContext.workspaceState.get('chatCache', []),
+            chatCache: this.extensionContext.workspaceState.get('chatCache', []),
           });
           break;
         // 更新指定timestamp的chat
         case 'updateChatCacheByTimestamp':
           const { chat, timestamp } = params;
-          const cache = this.extensonContext.workspaceState.get('chatCache') as IChatItem[];
+          const cache = this.extensionContext.workspaceState.get('chatCache') as IChatItem[];
           const cacheIndex = cache.findIndex((item) => item.timestamp === timestamp);
           if (cacheIndex !== -1) {
             cache[cacheIndex].chatList = chat;
           }
-          this.extensonContext.workspaceState.update('chatCache', cache);
+          this.extensionContext.workspaceState.update('chatCache', cache);
           break;
         default:
           break;
@@ -61,7 +61,7 @@ class ChatgptWebviewProvider implements vscode.WebviewViewProvider {
       <body>
           <div id="root"></div>
       </body>
-      <script src="${webview.asWebviewUri(vscode.Uri.joinPath(this.extensonContext.extensionUri, 'dist/bundle.js'))}"></script>
+      <script src="${webview.asWebviewUri(vscode.Uri.joinPath(this.extensionContext.extensionUri, 'dist/bundle.js'))}"></script>
       </html>`;
   }
 }
