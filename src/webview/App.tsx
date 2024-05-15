@@ -15,18 +15,44 @@ enum Mode {
   Chat = '2',
 }
 
+interface IParams {
+  chatCache: {
+    chatList: AIQuestionItem[],
+    timestamp: number
+  }[],
+  apiKey?: string,
+  model?: string,
+  currentTimestamp: number,
+}
+
 const App = () => {
   const [currentMode, setCurrentMode] = useState<Mode>(Mode.Home);
   const [currentChat, setCurrentChat] = useState<IChatItem>();
 
   // vscode 透传的params
-  const params = useParams();
+  const params = useParams<IParams>();
 
   useEffect(() => {
-    vscode.postMessage({
-      method: 'initParams'
-    });
-  }, [currentMode]);
+    // 2s轮询更新
+    setInterval(() => {
+      vscode.postMessage({
+        method: 'initParams'
+      });
+    }, 5000);
+  }, []);
+
+  useEffect(() => {
+    const { currentTimestamp, chatCache } = params;
+    const chat = chatCache?.find((item) => item.timestamp === currentTimestamp);
+    if (currentTimestamp && chat) {
+      setCurrentMode(Mode.Chat);
+      setCurrentChat(chat);
+      // 切换完状态要初始化timestamp标记位
+      vscode.postMessage({
+        method: 'clearTimestamp'
+      });
+    }
+  }, [params?.currentTimestamp, params?.chatCache]);
 
   return (
     <>

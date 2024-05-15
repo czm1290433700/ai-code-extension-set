@@ -15,17 +15,33 @@
     "commands": [{
       "command": "ai-code-extension-set.code-transform",
       "title": "Transform code"
+    }, {
+      "command": "ai-code-extension-set.follow-up-for-code-transform",
+      "title": "Follow up for code transform"
     }],
     "menus": {
-      "editor/context": [{
+      "editor/context": [
+        {
           "when": "editorFocus",
           "command": "ai-code-extension-set.code-transform",
           "group": "navigation"
-      }],
-      "explorer/context": [{
-        "command": "ai-code-extension-set.code-transform",
-        "group": "navigation"
-      }]
+        }, 
+        {
+          "when": "editorFocus",
+          "command": "ai-code-extension-set.follow-up-for-code-transform",
+          "group": "navigation"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "ai-code-extension-set.code-transform",
+          "group": "navigation"
+        },
+        {
+          "command": "ai-code-extension-set.follow-up-for-code-transform",
+          "group": "navigation"
+        }
+      ]
     },
     "views": {
       "chatgpt-for-vscode": [

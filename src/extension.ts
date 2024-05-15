@@ -13,8 +13,16 @@ export function activate(context: vscode.ExtensionContext) {
     }
   );
 
+  // 支持命令调起ChatGPT, 并创建一个新对话，指定上下文
+  const openChatGPT = vscode.commands.registerCommand(
+    'ai-code-extension-set.open-chatgpt',
+    () => {
+      vscode.commands.executeCommand('workbench.view.extension.chatgpt-for-vscode');
+    }
+  );
+
   // 代码语言转换工具
-  const codeTransformEntity = new CodeTransformer();
+  const codeTransformEntity = new CodeTransformer(context);
   const codeTransform = vscode.commands.registerCommand(
     'ai-code-extension-set.code-transform',
     (uri) => {
@@ -23,7 +31,15 @@ export function activate(context: vscode.ExtensionContext) {
     }
   );
 
-  context.subscriptions.push(chatgptProvider, codeTransform);
+  const followUpForCodeTransform = vscode.commands.registerCommand(
+    'ai-code-extension-set.follow-up-for-code-transform',
+    (uri) => {
+      const filePath = `/${uri.path.substring(1)}`;
+      codeTransformEntity.followUp(filePath);
+    }
+  );
+
+  context.subscriptions.push(chatgptProvider, openChatGPT, followUpForCodeTransform, codeTransform);
 }
 
 export function deactivate() { }

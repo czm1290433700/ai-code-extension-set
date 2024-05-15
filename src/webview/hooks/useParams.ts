@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 
-const useParams = () => {
-  const [webviewParams, setWebviewParams] = useState<Record<string, any>>({});
+// 增加泛型提高引用的类型安全
+const useParams = <T>(): T => {
+  const [webviewParams, setWebviewParams] = useState<T>({});
 
   useEffect(() => {
     const messageHandler = (event) => {

@@ -37,6 +37,7 @@ export const Chat: FC<IProps> = ({ vscode, params, chat, onBack }) => {
    * 提问function
    */
   const submit = async () => {
+    setQuestion('');
     const LLMRequestEntity = new LLMRequest(apiKey);
     let result = '';
     setCurrentChatList([
@@ -104,7 +105,7 @@ export const Chat: FC<IProps> = ({ vscode, params, chat, onBack }) => {
       <button onClick={onBack}>回到首页</button>
       {!(apiKey && model) && <div>未填写apiKey或model配置，请完成必要配置后使用</div>}
       <div className="chat_chatArea" ref={contentRef}>
-        {currentChatList.map((item) => {
+        {currentChatList?.map((item) => {
           return item.role === 'assistant' ? (
             <div className="chat_chatItem">
               <div className="chat_chatRole">ChatGPT</div>

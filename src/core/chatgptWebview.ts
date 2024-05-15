@@ -23,7 +23,8 @@ class ChatgptWebviewProvider implements vscode.WebviewViewProvider {
           webviewView.webview.postMessage({
             chatCache: this.extensionContext.workspaceState.get('chatCache', []),
             apiKey: configuration.get('aiCodeExtensionSet.apiKey'),
-            model: configuration.get('aiCodeExtensionSet.model')
+            model: configuration.get('aiCodeExtensionSet.model'),
+            currentTimestamp: this.extensionContext.workspaceState.get('currentTimestamp', 0),
           });
           break;
         // 落新的缓存
@@ -43,6 +44,10 @@ class ChatgptWebviewProvider implements vscode.WebviewViewProvider {
             cache[cacheIndex].chatList = chat;
           }
           this.extensionContext.workspaceState.update('chatCache', cache);
+          break;
+        // 清除时间戳
+        case 'clearTimestamp':
+          this.extensionContext.workspaceState.update('currentTimestamp', 0);
           break;
         default:
           break;
