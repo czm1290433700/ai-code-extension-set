@@ -39,7 +39,15 @@ export function activate(context: vscode.ExtensionContext) {
     }
   );
 
-  context.subscriptions.push(chatgptProvider, openChatGPT, followUpForCodeTransform, codeTransform);
+  const codeTransformForPartCode = vscode.commands.registerCommand(
+    'ai-code-extension-set.code-transform-for-part-code',
+    (uri) => {
+      const filePath = `/${uri.path.substring(1)}`;
+      codeTransformEntity.partTransform(filePath);
+    }
+  );
+
+  context.subscriptions.push(chatgptProvider, openChatGPT, followUpForCodeTransform, codeTransform, codeTransformForPartCode);
 }
 
 export function deactivate() { }

@@ -18,6 +18,9 @@
     }, {
       "command": "ai-code-extension-set.follow-up-for-code-transform",
       "title": "Follow up for code transform"
+    }, {
+      "command": "ai-code-extension-set.code-transform-for-part-code",
+      "title": "Transform code for part code"
     }],
     "menus": {
       "editor/context": [
@@ -29,6 +32,11 @@
         {
           "when": "editorFocus",
           "command": "ai-code-extension-set.follow-up-for-code-transform",
+          "group": "navigation"
+        }, 
+        {
+          "when": "editorFocus",
+          "command": "ai-code-extension-set.code-transform-for-part-code",
           "group": "navigation"
         }
       ],

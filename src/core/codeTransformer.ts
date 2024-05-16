@@ -33,7 +33,7 @@ class CodeTransformer {
    * 某路径对应的AI问题
    * @param filePath 
    */
-  private async getAIQuestion(filePath: string): Promise<{
+  private async getAIQuestion(filePath: string, code?: string): Promise<{
     role: "user" | "assistant" | "system";
     content: string;
   }[]> {
@@ -41,7 +41,12 @@ class CodeTransformer {
     const targetLanguage = configuration.get('aiCodeExtensionSet.targetLanguage') as 'javaScript' | 'java' | 'go' | 'python';
 
     const fileSuffix = filePath.split('.').pop();
-    const fileContent = await fs.promises.readFile(filePath);
+    let finalCode;
+    if (!code) {
+      finalCode = await fs.promises.readFile(filePath);
+    } else {
+      finalCode = code;
+    }
 
     return [
       {
@@ -50,13 +55,14 @@ class CodeTransformer {
       },
       {
         role: 'user',
-        content: `代码如下：${fileContent}`
+        content: `代码如下：${finalCode}`
       }
     ];
   }
 
   /**
    * 全量转换
+   * @param filePath 
    */
   async fullTransform(filePath: string) {
     const configuration = vscode.workspace.getConfiguration();
@@ -101,7 +107,7 @@ class CodeTransformer {
     try {
       const answerPath = await this.getResultFilePath(filePath);
       await fs.promises.access(answerPath, fs.constants.F_OK);
-      answer = await fs.promises.readFile(answerPath);
+      answer = (await fs.promises.readFile(answerPath)) || '';
     } catch (error) {
       vscode.window.showErrorMessage('未生成转换，请先生成转换文件后再使用追问');
     }
@@ -114,6 +120,43 @@ class CodeTransformer {
     }]);
     this.extensionContext.workspaceState.update('currentTimestamp', timestamp);
     vscode.commands.executeCommand('workbench.view.extension.chatgpt-for-vscode');
+  }
+
+  /**
+   * 指定选中代码的转换
+   * @param filePath 
+   */
+  async partTransform(filePath: string) {
+    const configuration = vscode.workspace.getConfiguration();
+    const targetLanguage = configuration.get('aiCodeExtensionSet.targetLanguage') as 'javaScript' | 'java' | 'go' | 'python';
+    const model = configuration.get('aiCodeExtensionSet.model') as 'gpt-3.5-turbo';
+    const LLMRequestEntity = new LLMRequest(configuration.get('aiCodeExtensionSet.apiKey'));
+    vscode.window.withProgress(
+      {
+        title: `Transform Code to ${targetLanguage} for part code`,
+        location: vscode.ProgressLocation.Notification,
+        cancellable: true
+      },
+      async (progress, token) => {
+        progress.report({ message: `当前作业文件路径: ${filePath}` });
+        const editor = vscode.window.activeTextEditor;
+        const selection = editor?.selection;
+        const selectedText = editor?.document.getText(selection);
+        try {
+          const resultFilePath = this.getResultFilePath(filePath);
+          const chatRes = (await LLMRequestEntity.openAIChat({
+            model,
+            messages: await this.getAIQuestion(filePath, selectedText),
+          })) as IOpenAIChatResponse;
+          await fs.promises.writeFile(resultFilePath, getCode(chatRes.answer));
+          vscode.window.showInformationMessage(`作业文件路径: ${filePath}转换完成`);
+          return;
+        } catch (err) {
+          vscode.window.showErrorMessage(err.meesage);
+          return;
+        }
+      }
+    );
   }
 }
 
