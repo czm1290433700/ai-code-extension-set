@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import ChatgptWebviewProvider from './core/chatgptWebview';
 import CodeTransformer from './core/codeTransformer';
+import CodeReviewProvider from './core/codeReviewProvider';
 
 export function activate(context: vscode.ExtensionContext) {
   // vscode插件中的ChatGPT
@@ -47,7 +48,18 @@ export function activate(context: vscode.ExtensionContext) {
     }
   );
 
-  context.subscriptions.push(chatgptProvider, openChatGPT, followUpForCodeTransform, codeTransform, codeTransformForPartCode);
+  const codeReviewProvider = new CodeReviewProvider();
+  const changePassiveDisposable = vscode.workspace.onDidSaveTextDocument((document) => {
+    codeReviewProvider.setDocument(document);
+    codeReviewProvider.review();
+  });
+
+  const openPassiveDisposable = vscode.workspace.onDidOpenTextDocument((document) => {
+    codeReviewProvider.setDocument(document);
+    codeReviewProvider.review();
+  });
+
+  context.subscriptions.push(chatgptProvider, openChatGPT, followUpForCodeTransform, codeTransform, codeTransformForPartCode, changePassiveDisposable, openPassiveDisposable);
 }
 
 export function deactivate() { }

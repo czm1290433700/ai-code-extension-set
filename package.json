@@ -9,8 +9,10 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
   "main": "./dist/extension.js",
+  "activationEvents": [
+    "*"
+  ],
   "contributes": {
     "commands": [{
       "command": "ai-code-extension-set.code-transform",
@@ -95,6 +97,11 @@
             "python"
           ],
           "description": "语言转换的目标语言"
+        },
+        "aiCodeExtensionSet.codeReviewRule": {
+          "type": "array",
+          "default": ["禁止使用无业务属性的魔改数字", "变量命名需要具备语义化", "代码缺乏错误兜底或存在潜在风险", "使用了any类型", "存在重复代码或者函数，缺乏封装"],
+          "description": "codeReview着重review的规则"
         }
       }
     }
