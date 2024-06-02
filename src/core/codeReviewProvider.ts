@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { default as LLMRequest } from "llm-request";
 import { IOpenAIChatResponse } from 'llm-request/dist/types/core/openAI/chat';
-import { getCode } from '../utils';
+import { getCode, getCodeRange, getColumnRange } from '../utils';
 
 /**
  * code review检测provider 
@@ -60,9 +60,7 @@ class CodeReviewProvider {
       content: `你需要在完成审查后，以以下规则输出结果。如果审查发现代码没有任何优化项，则返回false，如果有可优化项，请按照以下json格式返回给我当前文件所有有问题的代码:
       {
         problems: [{
-          content: xxx, // 有问题的代码 content
-          lines: [xxx, xxx], // 有问题的代码所在的行数区间，提供的审查代码以换行符\n换行，以此来计算行数
-          columns: [xxx, xxx] // 有问题的代码首行和尾行所在的列数区间，即首行的第一个字符在第几列，尾行的最后一个字符在第几列
+          content: xxx, // 有问题的代码内容
           msg: xxx, // 代码的具体问题，除描述问题外，尽可能提供解决的方案
         }, ... // 如果还有其他问题，同样的json格式]
       }`
@@ -81,9 +79,12 @@ class CodeReviewProvider {
     try {
       const { problems } = JSON.parse(getCode(chatRes.answer)) || JSON.parse(chatRes.answer); // 兼容markdown语法输出和直接输出的可能
       problems.forEach((item) => {
-        const { lines, columns, msg } = item;
-        const positionStart = new vscode.Position(lines[0], columns[0]);
-        const positionEnd = new vscode.Position(lines[0], columns[1]);
+        const { content, msg } = item;
+        const code = this.document.getText();
+        const [startLine, endLine] = getCodeRange(code, content);
+        const [startColumn, endColumn] = getColumnRange(code, content, startLine, endLine);
+        const positionStart = new vscode.Position(startLine - 1, startColumn - 1);
+        const positionEnd = new vscode.Position(endLine - 1, endColumn - 1);
         const diagnostic = new vscode.Diagnostic(
           new vscode.Range(positionStart, positionEnd),
           msg,
