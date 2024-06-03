@@ -60,14 +60,20 @@ class CodeReviewProvider {
       content: `你需要在完成审查后，以以下规则输出结果。如果审查发现代码没有任何优化项，则返回false，如果有可优化项，请按照以下json格式返回给我当前文件所有有问题的代码:
       {
         problems: [{
-          content: xxx, // 有问题的代码内容
+          content: xxx, // 有问题的代码片段, 请保持原代码的内容和格式
           msg: xxx, // 代码的具体问题，除描述问题外，尽可能提供解决的方案
+          fix: [{
+            method: xxx, // 修复方案的描述，比如“替换类型any为xxx”
+            code: xxx // 以此方案修复后的代码，可以直接替换原代码
+          }] // 针对有问题代码的修复方案，如果没有修复方案，返回[]
         }, ... // 如果还有其他问题，同样的json格式]
       }`
     }];
   }
 
   public async review() {
+    // 诊断前清除当前文件已有诊断
+    this.diagnosticCollection.delete(this.document.uri);
     const configuration = vscode.workspace.getConfiguration();
     const LLMRequestEntity = new LLMRequest(configuration.get('aiCodeExtensionSet.apiKey'));
     const model = configuration.get('aiCodeExtensionSet.model') as 'gpt-3.5-turbo';
@@ -78,23 +84,25 @@ class CodeReviewProvider {
     })) as IOpenAIChatResponse;
     try {
       const { problems } = JSON.parse(getCode(chatRes.answer)) || JSON.parse(chatRes.answer); // 兼容markdown语法输出和直接输出的可能
+      const code = this.document.getText();
       problems.forEach((item) => {
-        const { content, msg } = item;
-        const code = this.document.getText();
+        const { content, msg, fix } = item;
         const [startLine, endLine] = getCodeRange(code, content);
         const [startColumn, endColumn] = getColumnRange(code, content, startLine, endLine);
         const positionStart = new vscode.Position(startLine - 1, startColumn - 1);
         const positionEnd = new vscode.Position(endLine - 1, endColumn - 1);
         const diagnostic = new vscode.Diagnostic(
           new vscode.Range(positionStart, positionEnd),
-          msg,
+          `[基于OpenAI API生成]${msg}`, // 加上标识，便于 Action 的识别
           vscode.DiagnosticSeverity.Warning
         );
+
+        // @ts-ignore
+        diagnostic.fixArr = JSON.stringify(fix); // 将 fix 的关键信息通过自定义的fixArr传递
         const currentDiagnostics = this.diagnosticCollection.get(this.document.uri) || [];
         this.diagnosticCollection.set(this.document.uri, [...currentDiagnostics, diagnostic]);
       });
     } catch (err) {
-
     }
   }
 }
