@@ -9,9 +9,13 @@ import { getCode, getCodeRange, getColumnRange } from '../utils';
 class CodeReviewProvider {
   private diagnosticCollection: vscode.DiagnosticCollection;
   private document: vscode.TextDocument | null = null;
+  private progressBar: vscode.StatusBarItem;
 
   constructor() {
     this.diagnosticCollection = vscode.languages.createDiagnosticCollection('AICodeReview');
+    this.progressBar = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left);
+    this.progressBar.text = "代码审查中...";
+    this.progressBar.hide();
   }
 
   public setDocument(currentDocument: vscode.TextDocument) {
@@ -72,17 +76,18 @@ class CodeReviewProvider {
   }
 
   public async review() {
+    this.progressBar.show();
     // 诊断前清除当前文件已有诊断
     this.diagnosticCollection.delete(this.document.uri);
     const configuration = vscode.workspace.getConfiguration();
     const LLMRequestEntity = new LLMRequest(configuration.get('aiCodeExtensionSet.apiKey'));
     const model = configuration.get('aiCodeExtensionSet.model') as 'gpt-3.5-turbo';
 
-    const chatRes = (await LLMRequestEntity.openAIChat({
-      model,
-      messages: await this.getAIQuestion(),
-    })) as IOpenAIChatResponse;
     try {
+      const chatRes = (await LLMRequestEntity.openAIChat({
+        model,
+        messages: await this.getAIQuestion(),
+      })) as IOpenAIChatResponse;
       const { problems } = JSON.parse(getCode(chatRes.answer)) || JSON.parse(chatRes.answer); // 兼容markdown语法输出和直接输出的可能
       const code = this.document.getText();
       problems.forEach((item) => {
@@ -101,8 +106,10 @@ class CodeReviewProvider {
         diagnostic.fixArr = JSON.stringify(fix); // 将 fix 的关键信息通过自定义的fixArr传递
         const currentDiagnostics = this.diagnosticCollection.get(this.document.uri) || [];
         this.diagnosticCollection.set(this.document.uri, [...currentDiagnostics, diagnostic]);
+        this.progressBar.hide();
       });
     } catch (err) {
+      this.progressBar.hide();
     }
   }
 }
